@@ -58,6 +58,5 @@ done
 
 # Step 6: Index the sorted BAM files using samtools
 # Generate .bai index files for all sorted BAM files in the current directory.
-for bamfile in *.sorted.bam; do
-    samtools index "$bamfile"
-done
+for i in $(cat sortedbamfiles.txt); do echo ${i}; samtools index ${i}; done
+
