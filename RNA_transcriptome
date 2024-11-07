@@ -1,0 +1,63 @@
+#!/bin/bash
+
+# Step 1: Compress all FASTQ files
+# This step uses gzip to compress all FASTQ files in the directory, reducing storage space.
+gzip *.fastq
+
+# Step 2: Perform quality control with FastQC
+# Run FastQC on all compressed FASTQ files to generate quality reports.
+fastqc *.fastq.gz
+
+# Step 3: Trim adapters and low-quality reads with Trimmomatic
+# Loop through each sample ID in fastqfiles.txt and perform paired-end trimming.
+# Trimmomatic options:
+# - `ILLUMINACLIP`: Removes adapter sequences using the specified file.
+# - `LEADING`, `TRAILING`: Trim low-quality bases from the start and end.
+# - `SLIDINGWINDOW`: Trim based on average quality per window.
+# - `MINLEN`: Discard reads below this length.
+for i in $(cat fastqfiles.txt); do
+    echo "Processing sample: ${i}"
+    java -jar /home/muga/softwares/Trimmomatic-0.39/trimmomatic-0.39.jar PE -phred33 \
+        ${i}_R1_001.fastq.gz ${i}_R2_001.fastq.gz \
+        ${i}_paired_R1_001.fastq.gz ${i}_unpaired_R1_001.fastq.gz \
+        ${i}_paired_R2_001.fastq.gz ${i}_unpaired_R2_001.fastq.gz \
+        ILLUMINACLIP:TruSeq3-PE-2.fa:2:30:10 LEADING:5 TRAILING:5 \
+        SLIDINGWINDOW:4:20 MINLEN:25
+done
+
+# Step 4: Index the genome with STAR
+# Create a directory for the genome index and run STAR to generate the index files.
+mkdir -p path_to/genome_index
+./STAR --runMode genomeGenerate --runThreadN 8 \
+    --genomeDir ./genome_index \
+    --genomeFastaFiles AA_WT_genome.fasta \
+    --genomeSAindexNbases 13 \
+    --sjdbGTFfile AA_WT_gag_longest.gff \
+    --sjdbOverhang 99
+
+# Step 5: Align reads to the genome using STAR
+# Loop through each sample ID in fastqfiles.txt to perform alignment on paired-end reads.
+# Options explained:
+# - `--readFilesCommand zcat`: Uncompress the files on the fly.
+# - `--outSAMtype BAM SortedByCoordinate`: Output BAM files sorted by coordinates.
+# - `--outFilterMultimapNmax 1`: Report only uniquely aligned reads.
+for i in $(cat fastqfiles.txt); do
+    echo "Aligning sample: ${i}"
+    ./STAR --runThreadN 8 --genomeDir ./genome_index \
+        --readFilesIn ${i}_paired_R1_001.fastq.gz ${i}_paired_R2_001.fastq.gz \
+        --readFilesCommand zcat \
+        --outFileNamePrefix ${i}_aligned \
+        --outSAMtype BAM SortedByCoordinate \
+        --outFilterType BySJout \
+        --outFilterMultimapNmax 1 \
+        --alignIntronMin 20 \
+        --alignIntronMax 1000000 \
+        --alignMatesGapMax 1000000 \
+        --sjdbOverhang 99
+done
+
+# Step 6: Index the sorted BAM files using samtools
+# Generate .bai index files for all sorted BAM files in the current directory.
+for bamfile in *.sorted.bam; do
+    samtools index "$bamfile"
+done
