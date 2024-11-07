@@ -1,6 +1,6 @@
 # RNA-Seq Processing Pipeline
 
-This pipeline performs essential RNA-Seq preprocessing tasks, including compressing FASTQ files, quality control, trimming, genome indexing, alignment, and BAM file indexing.
+This pipeline performs essential RNA-Seq preprocessing tasks, including compressing FASTQ files, quality control, trimming, genome indexing, alignment,  BAM file indexing and nd read counting.
 
 ## Prerequisites
 
