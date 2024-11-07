@@ -32,7 +32,7 @@ mkdir -p path_to/genome_index
     --genomeDir ./genome_index \
     --genomeFastaFiles genome.fasta \
     --genomeSAindexNbases 13 \
-    --sjdbGTFfile genome_longest.gff \
+    --sjdbGTFfile genome.gff \
     --sjdbOverhang 99
 
 # Step 5: Align reads to the genome using STAR
@@ -59,4 +59,8 @@ done
 # Step 6: Index the sorted BAM files using samtools
 # Generate .bai index files for all sorted BAM files in the current directory.
 for i in $(cat sortedbamfiles.txt); do echo ${i}; samtools index ${i}; done
+
+# Step 7: Count the number of reads using featureCounts
+# This step uses featureCounts to count the reads assigned to genes using the sorted and indexed bamfiles.
+featureCounts -t gene -a genome.gff -p --countReadPairs -o outputfile.txt *.bam
 
