@@ -10,6 +10,7 @@ Make sure the following tools are installed:
 - **Trimmomatic**: Read trimming
 - **STAR**: Genome indexing and alignment
 - **samtools**: BAM file processing
+- **featureCounts**: Counting the number of reads assigned to genes
 
 ## Workflow
 
@@ -19,6 +20,7 @@ Make sure the following tools are installed:
 4. **Genome Indexing (STAR)**: Prepares the genome index for alignment.
 5. **Alignment (STAR)**: Aligns reads to the genome, generating sorted BAM files.
 6. **Index BAM Files (samtools)**: Creates index files for BAM files.
+7. **Count Reads (featureCounts)**: Counts the number of reads assigned to genes
 
 ## Usage
 
