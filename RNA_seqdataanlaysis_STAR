@@ -30,9 +30,9 @@ done
 mkdir -p path_to/genome_index
 ./STAR --runMode genomeGenerate --runThreadN 8 \
     --genomeDir ./genome_index \
-    --genomeFastaFiles AA_WT_genome.fasta \
+    --genomeFastaFiles genome.fasta \
     --genomeSAindexNbases 13 \
-    --sjdbGTFfile AA_WT_gag_longest.gff \
+    --sjdbGTFfile genome_longest.gff \
     --sjdbOverhang 99
 
 # Step 5: Align reads to the genome using STAR
